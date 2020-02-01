@@ -1,23 +1,24 @@
 import { Schema } from '../index'
 
-describe('Scehma', () => {
+describe('Schema', () => {
   let schema
 
   beforeEach(() => {
     schema = new Schema()
   })
 
-  it('should contains posts table in his list of schemas', () => {
+  it('should contains posts table in schemas list', () => {
     load()
 
-    expect(schema.list()).toEqual(expect.arrayContaining(['posts']))
+    expect(schema.list()).toIncludeAllMembers(['posts'])
 
   })
 
   it('should have a posts table', () => {
     load()
 
-    expect(schema.has('posts')).toBe(true)
+    expect(schema.has('posts')).toBeTrue()
+    expect(schema.all()).toContainKey('posts')
 
   })
 
@@ -28,17 +29,27 @@ describe('Scehma', () => {
 
   })
 
-  it('should have a valid post', () => {
+  it('should have a valid post on posts table', () => {
 
     expect(() => load()).not.toThrow()
 
   })
 
-  it('should have an invalid post', () => {
+  it('should have an invalid post on posts table', () => {
 
     expect(() => loadInvalid()).toThrow()
 
   })
+
+  it('should remove posts table', () => {
+    load()
+
+    schema.delete('posts')
+
+    expect(schema.get('posts')).toBeNil()
+
+  })
+
 
   const struct = {
     id: {

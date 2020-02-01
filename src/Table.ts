@@ -14,11 +14,11 @@ export default class Table {
 
   public struct: object
 
-  public data: Array<object>
+  public data: object[]
 
   private _primary_key: string
 
-  constructor(name: string, struct: object, data: Array<object>) {
+  constructor(name: string, struct: object, data: object[]) {
     this.name = name
     this.struct = struct
     this.data = data
@@ -30,12 +30,71 @@ export default class Table {
     this.normalizeEntries()
   }
 
-  public find(primary_key_val: number | string): Object | null {
-    return this.data.find(item => item[this._primary_key] === primary_key_val) || null
+  insertMany(rows: object[] = []): Table {
+    try {
+      this.checkEntries(rows)
+      this.data = this.data.concat(rows)
+      return this
+    } catch (e) {
+      throw e
+    }
   }
 
-  private checkEntries(): void {
-    this.data.forEach(this.checkEntry.bind(this))
+  insert(row: object): Table {
+    try {
+      this.checkEntry(row)
+      this.data.push(row)
+      return this
+    } catch (e) {
+      throw e
+    }
+  }
+
+  public find(primary_key_val: number | string): Object | null {
+    return this.data.find(item => item !== undefined && item[this._primary_key] === primary_key_val) || null
+  }
+
+  public findIndex(primary_key_val: number | string): number {
+    return this.data.findIndex(item => item !== undefined && item[this._primary_key] === primary_key_val)
+  }
+
+  public findBy(key: string, value: string|number|boolean, strict = false): object[] {
+    return this.data.filter(item => {
+      if (strict) return item[key] === value
+      return item[key] == value
+    })
+  }
+
+  public update(primary_key_val: number | string, params: object): object {
+    const i = this.findIndex(primary_key_val)
+
+    if (i < 0)
+      throw `[Err] Table.update - cannot find element with a primary key of '${primary_key_val}' on '${this.name}' table structure`
+
+    this.data[i] = {...this.data[i], ...params}
+
+    return this.data[i]
+  }
+
+  public delete(primary_key_val: number | string, soft_delete: boolean = false): object {
+    const i = this.findIndex(primary_key_val)
+
+    if (i < 0)
+      throw `[Err] Table.delete - cannot find element with a primary key of '${primary_key_val}' on '${this.name}' table structure`
+
+
+    if (soft_delete)
+      return this.update(primary_key_val, {_deleted: true})
+
+    const row = this.data[i]
+
+    this.data[i] = undefined
+
+    return row
+  }
+
+  private checkEntries(rows: object[] | null = null): void {
+    (rows || this.data).forEach(this.checkEntry.bind(this))
   }
 
   private normalizeEntries(): void {

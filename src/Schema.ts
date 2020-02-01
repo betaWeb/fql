@@ -30,7 +30,7 @@ export default class Schema {
 
   public delete(table_name: string): Schema {
     if (this.has(table_name))
-      this.schemas[table_name] === undefined
+      this.schemas[table_name] = undefined
     return this
   }
 

@@ -117,7 +117,73 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"src/Schema.ts":[function(require,module,exports) {
+})({"src/Table.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Table =
+/** @class */
+function () {
+  function Table(name, struct, data) {
+    this.name = name;
+    this.struct = struct;
+    this.data = data;
+    this._primary_key = null;
+    if (!this.data.length) return;
+    this.checkEntries();
+    this.normalizeEntries();
+  }
+
+  Table.prototype.find = function (primary_key_val) {
+    var _this = this;
+
+    return this.data.find(function (item) {
+      return item[_this._primary_key] === primary_key_val;
+    }) || null;
+  };
+
+  Table.prototype.checkEntries = function () {
+    this.data.forEach(this.checkEntry.bind(this));
+  };
+
+  Table.prototype.normalizeEntries = function () {
+    this.data.forEach(this.normalizeEntry.bind(this));
+  };
+
+  Table.prototype.checkEntry = function (entry) {
+    var _this = this;
+
+    var struct, value;
+    Object.keys(this.struct).forEach(function (field) {
+      struct = _this.struct[field];
+      value = entry[field];
+      if (struct.primary_key === true) _this._primary_key = field;
+      if (!struct) throw "[Err] Table.struct - '" + field + "' field does not exists on '" + _this.name + "' table structure";
+      if (struct.nullable === false && struct.required === true && (value === null || value === undefined) && struct.default_value === undefined) throw "[Err] Table.struct - '" + field + "' field cannot be empty on '" + _this.name + "' table";
+      if (value !== undefined && value.constructor !== struct.type) throw "[Err] Table.struct - '" + field + "' field have to be of type " + struct.type.name + " on '" + _this.name + "' table";
+    });
+  };
+
+  Table.prototype.normalizeEntry = function (entry) {
+    var _this = this;
+
+    var struct, value;
+    Object.keys(this.struct).forEach(function (field) {
+      struct = _this.struct[field];
+      value = entry[field];
+      if (struct.nullable && value === undefined) entry[field] = null;
+      if (!struct.nullable && struct.default_value) entry[field] = struct.default_value;
+    });
+  };
+
+  return Table;
+}();
+
+exports.default = Table;
+},{}],"src/Schema.ts":[function(require,module,exports) {
 "use strict";
 
 var __assign = this && this.__assign || function () {
@@ -136,19 +202,29 @@ var __assign = this && this.__assign || function () {
   return __assign.apply(this, arguments);
 };
 
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var Table_1 = __importDefault(require("./Table"));
+
 var Schema =
 /** @class */
 function () {
-  function Schema() {
-    this.schemas = {};
-  }
+  function Schema() {}
 
   Schema.prototype.all = function () {
     return this.schemas;
+  };
+
+  Schema.prototype.list = function () {
+    return Object.keys(this.schemas);
   };
 
   Schema.prototype.has = function (table_name) {
@@ -159,8 +235,8 @@ function () {
     return this.schemas[table_name] || null;
   };
 
-  Schema.prototype.load = function (table) {
-    this.schemas = __assign(__assign({}, this.schemas), table);
+  Schema.prototype.load = function (tables) {
+    this.schemas = __assign(__assign({}, this.schemas), this.buildTables(tables));
     return this;
   };
 
@@ -169,11 +245,22 @@ function () {
     return this;
   };
 
+  Schema.prototype.buildTables = function (tables) {
+    return tables.reduce(function (acc, _a) {
+      var _b;
+
+      var name = _a.name,
+          struct = _a.struct,
+          data = _a.data;
+      return __assign(__assign({}, acc), (_b = {}, _b[name] = new Table_1.default(name, struct, data), _b));
+    }, {});
+  };
+
   return Schema;
 }();
 
 exports.default = Schema;
-},{}],"index.js":[function(require,module,exports) {
+},{"./Table":"src/Table.ts"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -215,7 +302,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63809" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39225" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,0 +1,32 @@
+{
+  "name": "@betaweb/fql",
+  "version": "0.0.1",
+  "description": "Frontend Query Language - a simple representation of a SGBD structure in JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel serve index.js",
+    "watch": "parcel watch index.js",
+    "build": "parcel build index.js",
+    "test": "jest --watchAll"
+  },
+  "keywords": [
+    "fql",
+    "frontend",
+    "database",
+    "query",
+    "sgbd",
+    "javascript",
+    "sql"
+  ],
+  "author": "Cyprien GLEPIN <betaweb34@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-typescript": "^7.8.3",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.7.5"
+  }
+}

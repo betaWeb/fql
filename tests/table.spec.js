@@ -1,6 +1,7 @@
-import { Table } from '../index'
+import { Schema, Table } from '../index'
 
 describe('Table', () => {
+  let schema = new Schema('simple_blog')
   let table
   const struct = {
     id: {
@@ -34,7 +35,7 @@ describe('Table', () => {
       default_value: new Date,
       required: true
     },
-    category: {
+    category_id: {
       type: 'relation',
       references: 'category',
       foreign_key: 'id',
@@ -50,9 +51,15 @@ describe('Table', () => {
     id: 2,
     title: 'Mon second article'
   }
+  const dataWithRelation = {
+    id: 3,
+    title: 'Mon article catégorisé',
+    body: 'aaezaa',
+    category_id: 1
+  }
 
   beforeEach(() => {
-    table = new Table('posts', struct, [])
+    table = schema.createTable('posts', struct, [])
   })
 
   it('should have no data', () => {
@@ -170,6 +177,14 @@ describe('Table', () => {
 
     expect(() => table.delete(1))
         .toThrowError("[Err] Table.delete - cannot find element with a primary key of '1' on 'posts' table structure")
+
+  })
+
+  it ('should returns an entry with his relationships', () => {
+
+    table.insert(dataValid)
+
+    const post = table.find(1)
 
   })
 

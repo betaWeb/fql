@@ -83,7 +83,7 @@ describe('Schema', () => {
       default_value: new Date,
       required: true
     },
-    category: {
+    category_id: {
       type: 'relation',
       references: 'category',
       foreign_key: 'id',

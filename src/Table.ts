@@ -1,3 +1,5 @@
+import Schema from "./Schema";
+
 interface Struct {
   type: any,
   primary_key: Boolean,
@@ -14,15 +16,19 @@ export default class Table {
 
   public struct: object
 
-  public data: object[]
+  public data: object[] = []
 
-  private _primary_key: string
+  private schema: Schema
 
-  constructor(name: string, struct: object, data: object[]) {
+  private _primary_key: string = 'id'
+
+  private _relationships: object = {}
+
+  constructor(name: string, struct: object, data: object[] = [], schema: Schema) {
     this.name = name
     this.struct = struct
     this.data = data
-    this._primary_key = null
+    this.schema = schema
 
     if (!this.data.length) return
 
@@ -51,7 +57,11 @@ export default class Table {
   }
 
   public find(primary_key_val: number | string): Object | null {
-    return this.data.find(item => item !== undefined && item[this._primary_key] === primary_key_val) || null
+    let dataset = this.data.find(item => item !== undefined && item[this._primary_key] === primary_key_val) || null
+
+    dataset = this.feedRelationships(dataset)
+
+    return dataset
   }
 
   public findIndex(primary_key_val: number | string): number {
@@ -124,6 +134,9 @@ export default class Table {
 
       if (value !== undefined && value.constructor !== struct.type)
         throw `[Err] Table.struct - '${field}' field have to be of type ${struct.type.name} on '${this.name}' table`
+
+      if (struct.type === 'relation' && !this._relationships[field])
+        this._relationships[field] = struct.type
     })
   }
 
@@ -142,4 +155,12 @@ export default class Table {
     })
   }
 
+  /**
+   * @todo
+   * get entries relationships via _relationships property (recursive way)
+   * dataset.forEach(item => ...)
+   */
+  private feedRelationships(dataset: object) {
+    return dataset
+  }
 }
